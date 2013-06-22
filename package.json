@@ -1,0 +1,27 @@
+{
+    "name": "moocrank"
+  , "description": "Search engine for employees to search courses"
+  , "version": "0.0.1"
+  , "author": [
+      {
+        "name": "Israel Gutiérrez",
+        "email": "igutierrez@inv.it.uc3m.es"
+      },
+      {
+        "name": "Derick Leony",
+        "email": "dleony@it.uc3m.es"
+      }
+    ]
+  , "repository" : { 
+      "type" : "git",
+      "url" : "http://github.com/gootyfer/moocrank.git"
+  } 
+  , "dependencies": {
+      "mongodb": "latest",
+      "xmldoc": "latest"
+  }
+  , "engines": {
+      "node": "0.10.8",
+      "npm": "1.2.23"
+  }
+}
