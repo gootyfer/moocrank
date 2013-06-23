@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}
+  #courses
+    - each course in courses
+      div.course
+        span.name= course.name
+        ul
+          if course.outcomes  
+            - each outcome in course.outcomes
+              li outcome
+          li
+            a(href='#')= '+'
