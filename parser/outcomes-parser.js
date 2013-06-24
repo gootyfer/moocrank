@@ -54,6 +54,8 @@ fs.readFile(xmlFilePath, "UTF-8",function(error, xml) {
 						cat.subcats.push(subcat);
 					}
 				});
+				cat._id = catArray.length+1;
+				cat.id = catArray.length+1;
 				catArray.push(cat);
 				console.log(cat);
 			}
@@ -66,7 +68,7 @@ fs.readFile(xmlFilePath, "UTF-8",function(error, xml) {
 	  MongoClient.connect('mongodb://'+config.database.url+':'+config.database.port+'/'+config.database.name, function(err, db) {
 	    if(err) throw err;
 
-	    var collection = db.collection('outcomeCategories');
+	    var collection = db.collection('outcomes');
 	    collection.insert(catArray, function(err, docs) {
 
 	      collection.count(function(err, count) {
