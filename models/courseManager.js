@@ -35,6 +35,18 @@ CourseManager.prototype.getCollection= function(callback) {
 	    });
 	};
 
+	CourseManager.prototype.find = function(course, callback) {
+	    this.getCollection(function(error, coursesCollection) {
+	      if( error ) callback(error);
+	      else {
+	        coursesCollection.find(course).toArray(function(error, results) {
+	          if( error ) callback(error);
+	          else callback(null, results);
+	        });
+	      }
+	    });
+	};
+
 
 	CourseManager.prototype.findById = function(id, callback) {
 	    this.getCollection(function(error, coursesCollection) {

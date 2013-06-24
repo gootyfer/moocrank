@@ -4,16 +4,19 @@
  */
 
 var express = require('express')
-  , routes = require('./routes')
-  , user = require('./routes/user')
+//  , routes = require('./routes')
+//  , user = require('./routes/user')
   , http = require('http')
   , path = require('path')
   , CourseManager = require('./models/courseManager').CourseManager ;
 
+//config file
+var config = require('config.json');
+
 var app = express();
 
 // all environments
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || config.server.port);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 app.use(express.favicon());
@@ -36,7 +39,7 @@ http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
 
-var courseManager = new CourseManager('localhost', 27017, 'moocrank');
+var courseManager = new CourseManager(config.database.url, config.database.port, config.database.name);
 
 //Routes
 
