@@ -11,7 +11,7 @@ var express = require('express')
   , CourseManager = require('./models/courseManager').CourseManager ;
 
 //config file
-var config = require('config.json');
+var config = require('./config.json');
 
 var app = express();
 
