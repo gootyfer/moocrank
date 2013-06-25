@@ -6,6 +6,7 @@
 var express = require('express')
 //  , routes = require('./routes')
 //  , user = require('./routes/user')
+  , wishlist = require('./routes/wishlist')
   , http = require('http')
   , path = require('path')
   , CatManager = require('./models/catManager').CatManager
@@ -49,13 +50,31 @@ var outcomeManager = new OutcomeManager(config.database.url, config.database.por
 
 //Routes
 
-app.get('/', function(req, res){
+app.get('/all-courses', function(req, res){
   courseManager.findAll(function(error, courses){
     res.render('index', {
       title: 'Courses',
       courses: courses
     });
   });
+});
+
+app.get('/wishlist', function(req, res) {
+   outcomeManager.findAll(function(error, outcomes) {
+     var arrayByCats = {};
+     outcomes.map(function(outcome) {
+       if (outcome.cat in arrayByCats) {
+         arrayByCats[outcome.cat].outcomes.push(outcome);
+       } else {
+         arrayByCats[outcome.cat] = {
+           id: outcome.cat,
+           outcomes: [outcome],
+           catName: outcome.catName
+         };
+       }
+     });
+     res.render('wishlist', { title: 'Select outcomes', cats: arrayByCats});  
+   }); 
 });
 
 app.get('/search', function(req, res){

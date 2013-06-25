@@ -1,0 +1,39 @@
+extends layout
+
+block content
+  div#outcomes.span12.accordion
+    - var currentSubcat;
+    each cat in cats
+      div.accordion-group
+        div.accordion-heading
+          a(href='#cat_' + cat.id, data-toggle='collapse', data-parent='outcomes').accordion-toggle
+            h4= cat.catName
+        div(id='cat_' + cat.id).accordion-body.collapse
+          div.accordion-inner
+            each outcome in cat.outcomes
+              - if(currentSubcat != outcome.subcat)
+                - currentSubcat = outcome.subcat
+                h5= outcome.subcatName
+              label.checkbox
+                div
+                  - if(outcomes && outcomes.indexOf(outcome.id)!=-1)
+                    input(type='checkbox', checked, onchange='changeOutcome("/unwishOutcome/'+outcome.id+'")')
+                  - else
+                    input(type='checkbox', onchange='changeOutcome("/wishOutcome/'+outcome.id+'")')
+                  =outcome.name
+
+block append script
+  script(src='/js/moocrank.js')
+
+block header
+  .masthead
+    h3.muted moocrank
+    .navbar
+      .navbar-inner
+        .container
+          ul.nav
+            li: a(href='/index.html') Home
+            li.active: a(href='/wishlist') Objectives
+            li: a(href='/search') Courses
+            li: a(href='/source.html') Source Code
+            li: a(href='/about.html') About
