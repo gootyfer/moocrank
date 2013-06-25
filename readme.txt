@@ -4,7 +4,7 @@ Search engine for employees to search courses (MOOCs) based on some parameters: 
 How-to moocrank
 
 Install stuff!
-- install node: apt-get install node
+- install node: apt-get install nodejs
 - install mongodb: apt-get install mongodb
 - in the root directory, update dependencies: npm install
 
