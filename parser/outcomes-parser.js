@@ -54,13 +54,29 @@ fs.readFile(xmlFilePath, "UTF-8",function(error, xml) {
 						cat.subcats.push(subcat);
 					}
 				});
-				cat._id = catArray.length+1;
-				cat.id = catArray.length+1;
+				//cat._id = catArray.length+1;
+				//cat.id = catArray.length+1;
 				catArray.push(cat);
-				console.log(cat);
+				//console.log(cat);
 			}
 		}
 	});
+	//De-normalize
+	var outcomes = [];
+	catArray.forEach(function(cat, catIndex){
+		cat.subcats.forEach(function(subcat, subcatIndex){
+			subcat.outcomes.forEach(function(outcome){
+				outcome.cat = catIndex + 1;
+				outcome.catName = cat.name;
+				outcome.subcat = subcatIndex + 1;
+				outcome.subcatName = subcat.name;
+				outcome.id = outcomes.length +1;
+				outcome._id = outcomes.length +1;
+				outcomes.push(outcome);
+			});
+		});
+	});
+
 	//Save to mongo
 	var MongoClient = require('mongodb').MongoClient
 	    , format = require('util').format;    
@@ -69,10 +85,10 @@ fs.readFile(xmlFilePath, "UTF-8",function(error, xml) {
 	    if(err) throw err;
 
 	    var collection = db.collection('outcomes');
-	    collection.insert(catArray, function(err, docs) {
+	    collection.insert(outcomes, function(err, docs) {
 
 	      collection.count(function(err, count) {
-	        console.log(format("count = %s outcomeCategories saved!", count));
+	        console.log(format("count = %s outcomes saved!", count));
 	      });
 
 		db.close();
