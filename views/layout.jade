@@ -15,3 +15,17 @@ html
   block script
     script(src='http://code.jquery.com/jquery.js')
     script(src='/bootstrap/js/bootstrap.min.js')
+
+mixin menu(active)
+  - var menuList = [ {title:'Home', link:'/'}, {title:'Objectives', link:'/wishlist'}, {title:'Courses', link:'/search'}, {title:'Source', link:'#'}, {title:'About', link:'#'} ];
+  .masthead
+    h3.muted moocrank
+    .navbar
+      .navbar-inner
+        .container
+          ul.nav
+            - for(var i=0;i<menuList.length;i++)
+              - if(i==active)
+                li.active: a(href=menuList[i].link)= menuList[i].title
+              - else
+                li: a(href=menuList[i].link)= menuList[i].title
