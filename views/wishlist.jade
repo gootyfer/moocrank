@@ -1,21 +1,21 @@
 extends layout
 
 block content
-  div#outcomes.span12.accordion
+  #outcomes.span12.accordion
     - var currentSubcat;
     each cat in cats
-      div.accordion-group
-        div.accordion-heading
+      .accordion-group
+        .accordion-heading
           a(href='#cat_' + cat.id, data-toggle='collapse', data-parent='outcomes').accordion-toggle
             h4= cat.catName
         div(id='cat_' + cat.id).accordion-body.collapse
-          div.accordion-inner
+          .accordion-inner
             div(id='acc_cat_' + cat.id).span10.accordion
               each outcome in cat.outcomes
                 - if(currentSubcat != outcome.subcat)
                   - currentSubcat = outcome.subcat
-                    div.accordion-group
-                      div.accordion-heading
+                    .accordion-group
+                      .accordion-heading
                         a(href='#subcat_' + outcome.subcat, data-toggle='collapse', data-parent='outcomes').accordion-toggle
                           h5= outcome.subcatName
                 label.checkbox
@@ -39,5 +39,5 @@ block header
             li: a(href='/index.html') Home
             li.active: a(href='/wishlist') Objectives
             li: a(href='/search') Courses
-            li: a(href='/source.html') Source Code
-            li: a(href='/about.html') About
+            li: a(href='#') Source Code
+            li: a(href='#') About
