@@ -6,7 +6,7 @@
 var express = require('express')
 //  , routes = require('./routes')
 //  , user = require('./routes/user')
-  , wishlist = require('./routes/wishlist')
+//  , wishlist = require('./routes/wishlist')
   , http = require('http')
   , path = require('path')
   , CatManager = require('./models/catManager').CatManager
