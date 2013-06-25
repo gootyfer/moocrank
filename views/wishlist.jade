@@ -10,17 +10,21 @@ block content
             h4= cat.catName
         div(id='cat_' + cat.id).accordion-body.collapse
           div.accordion-inner
-            each outcome in cat.outcomes
-              - if(currentSubcat != outcome.subcat)
-                - currentSubcat = outcome.subcat
-                h5= outcome.subcatName
-              label.checkbox
-                div
-                  - if(outcomes && outcomes.indexOf(outcome.id)!=-1)
-                    input(type='checkbox', checked, onchange='changeOutcome("/unwishOutcome/'+outcome.id+'")')
-                  - else
-                    input(type='checkbox', onchange='changeOutcome("/wishOutcome/'+outcome.id+'")')
-                  =outcome.name
+            div(id='acc_cat_' + cat.id).span10.accordion
+              each outcome in cat.outcomes
+                - if(currentSubcat != outcome.subcat)
+                  - currentSubcat = outcome.subcat
+                    div.accordion-group
+                      div.accordion-heading
+                        a(href='#subcat_' + outcome.subcat, data-toggle='collapse', data-parent='outcomes').accordion-toggle
+                          h5= outcome.subcatName
+                label.checkbox
+                  div
+                    - if(outcomes && outcomes.indexOf(outcome.id)!=-1)
+                      input(type='checkbox', checked, onchange='changeOutcome("/unwishOutcome/'+outcome.id+'")')
+                    - else
+                      input(type='checkbox', onchange='changeOutcome("/wishOutcome/'+outcome.id+'")')
+                    =outcome.name
 
 block append script
   script(src='/js/moocrank.js')
