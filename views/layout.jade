@@ -2,6 +2,16 @@ doctype 5
 html
   head
     title= title
-    link(rel='stylesheet', href='/stylesheets/style.css')
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    link(rel='stylesheet', href='/bootstrap/css/bootstrap.min.css', media='screen')
+    link(rel='stylesheet', href='/css/moocrank.css')
   body
+  .container
+    block header
     block content
+    block footer
+      .footer
+        p Universidad Carlos III de Madrid
+  block script
+    script(src='http://code.jquery.com/jquery.js')
+    script(src='/bootstrap/js/bootstrap.min.js')

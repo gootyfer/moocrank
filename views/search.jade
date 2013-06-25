@@ -1,0 +1,35 @@
+extends layout
+
+block content
+  - each course in courses
+    .media
+      img.pull-left.media-object(src=course.small_icon_hover)
+      .media-body
+        h4.media-heading= course.name
+        ul
+          li: <strong>Platform</strong>: 
+          = course.platform
+          li: <strong>Provider</strong>: 
+            - each uni in course.unisNames
+              = uni
+          li: <strong>Categories</strong>:
+            ul
+              - each cat in course.catsNames
+                li= cat
+        p
+          a.btn.btn-info(href='http://www.coursera.org/course/'+course.short_name) Enroll now!
+          |  
+          a.btn.btn-success(href='/evaluate/'+course.id) Add to my profile
+
+block header
+  .masthead
+    h3.muted moocrank
+    .navbar
+      .navbar-inner
+        .container
+          ul.nav
+            li: a(href='/index.html') Home
+            li: a(href='/objectives.html') Objectives
+            li.active: a(href='/search') Courses
+            li: a(href='/source.html') Source Code
+            li: a(href='/about.html') About

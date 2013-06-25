@@ -1,0 +1,53 @@
+extends layout
+
+block content
+  .row
+    .span6
+      img(src= course.large_icon)
+      h4= course.name
+      ul
+        li: <strong>Platform</strong>: 
+          =course.platform
+        li: <strong>Provider</strong>: 
+          =unis[0].name
+        li <strong>Categories</strong>:
+          ul
+            - each cat in cats
+              li= cat.name
+      p
+        a.btn(href='/search') Back
+        |  
+        a.btn.btn-success(href='#') Save
+    .span6
+      - var currentCat;
+      - var currentSubcat;
+      - each outcome in outcomes
+        - if(currentCat != outcome.cat)
+          - currentCat = outcome.cat
+          h4= outcome.catName
+        - if(currentSubcat != outcome.subcat)
+          - currentSubcat = outcome.subcat
+          h5= outcome.subcatName
+        label.checkbox
+          div
+            - if(course.outcomes && course.outcomes.indexOf(outcome.id)!=-1)
+              input(type='checkbox', checked, onchange='changeOutcome("/removeOutcome/'+course.id+'/'+outcome.id+'")')
+            - else
+              input(type='checkbox', onchange='changeOutcome("/addOutcome/'+course.id+'/'+outcome.id+'")')
+            =outcome.name
+
+block append script
+  script(src='/js/moocrank.js')
+
+block header
+  .masthead
+    h3.muted moocrank
+    .navbar
+      .navbar-inner
+        .container
+          ul.nav
+            li: a(href='/index.html') Home
+            li: a(href='/objectives.html') Objectives
+            li.active: a(href='/search') Courses
+            li: a(href='/source.html') Source Code
+            li: a(href='/about.html') About
