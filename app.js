@@ -8,6 +8,9 @@ var express = require('express')
 //  , user = require('./routes/user')
   , http = require('http')
   , path = require('path')
+  , CatManager = require('./models/catManager').CatManager
+  , UniManager = require('./models/uniManager').UniManager
+  , OutcomeManager = require('./models/outcomeManager').OutcomeManager
   , CourseManager = require('./models/courseManager').CourseManager ;
 
 //config file
@@ -40,6 +43,9 @@ http.createServer(app).listen(app.get('port'), function(){
 });
 
 var courseManager = new CourseManager(config.database.url, config.database.port, config.database.name);
+var uniManager = new UniManager(config.database.url, config.database.port, config.database.name);
+var catManager = new CatManager(config.database.url, config.database.port, config.database.name);
+var outcomeManager = new OutcomeManager(config.database.url, config.database.port, config.database.name);
 
 //Routes
 
@@ -51,3 +57,113 @@ app.get('/', function(req, res){
     });
   });
 });
+
+app.get('/search', function(req, res){
+  //Search computer science courses only
+  courseManager.find({cats:{$in:[1,11,12,17]}}, function(error, courses){
+    uniManager.findAll(function(error, unis){
+      catManager.findAll(function(error, cats){
+        courses.forEach(function(course){
+          //Add unis names
+          course.unisNames = [];
+          if(course.unis){
+            var myUnis = searchUnis(unis, course.unis);
+            myUnis.forEach(function(uni){
+              course.unisNames.push(uni.name);
+            });
+          }
+          //Add cat names
+          course.catsNames = [];
+          if(course.cats){
+            var myCats = searchCats(cats, course.cats);
+            myCats.forEach(function(cat){
+              course.catsNames.push(cat.name);
+            });
+          }
+        });
+        res.render('search', {
+          title: 'Courses recommendation',
+          courses: courses
+        });
+      });
+    });
+  });
+});
+
+app.get('/evaluate/:id', function(req, res){
+  //console.log(req.params.id);
+  courseManager.findById(parseInt(req.params.id), function(error, course){
+    if(error) res.send(404, 'Sorry, we cannot find that!');
+    else{
+      uniManager.findAllById(course.unis, function(error, unis){
+        catManager.findAllById(course.cats, function(error, cats){
+          outcomeManager.findAllById(course.domains, function(error, outcomes){
+            //console.log(course);
+            //console.log(unis);
+            //console.log(cats);
+            //console.log(outcomes);
+            res.render('evaluation', {
+              title: 'Evaluate '+course.name,
+              course:course, 
+              unis:unis, 
+              cats:cats, 
+              outcomes: outcomes
+            });
+          });
+        });
+      });
+    }
+  });
+});
+
+app.get('/addOutcome/:courseId/:outcomeId', function(req, res){
+  courseManager.findById(parseInt(req.params.courseId), function(error, course){
+    if(error) res.send(404);
+    else{
+      course.outcomes = course.outcomes? course.outcomes : [];
+      course.outcomes.push(parseInt(req.params.outcomeId));
+      courseManager.save(course, function(error, courses){
+        if(error) res.send(404);
+        else res.send(200);
+      });
+    }
+  });
+});
+
+app.get('/removeOutcome/:courseId/:outcomeId', function(req, res){
+  courseManager.findById(parseInt(req.params.id), function(error, course){
+    if(error || !course.outcomes) res.send(404);
+    else{
+      var outcomeIdIndex = course.outcomes.indexOf(parseInt(req.params.outcomeId));
+      if(outcomeIdIndex != -1){
+        //Remove from array
+        course.outcomes.splice(outcomeIdIndex,1);
+        courseManager.save(course, function(error, courses){
+          if(error) res.send(404);
+          else res.send(200);
+        });
+      }
+    }
+  });
+});
+
+//Helpers
+function searchUnis(unis, uniIds){
+  var found = [];
+  unis.forEach(function(uni){
+    if(uniIds.indexOf(uni.id)!=-1){
+      found.push(uni);
+    }
+  });
+  return found;
+}
+
+function searchCats(cats, catIds){
+  var found = [];
+  cats.forEach(function(cat){
+    if(catIds.indexOf(cat.id)!=-1){
+      found.push(cat);
+    }
+  });
+  return found;
+}
