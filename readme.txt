@@ -9,8 +9,10 @@ Install stuff!
 - in the root directory, update dependencies: npm install
 
 Configure it!
-- to create in db courses: node parser/coursera-parser.js
-- to create in db outcomes: node parser/outcomes-parser.js
+- install coursera courses: node parser/coursera-parser.js
+- install udacity courses: node parser/udacity-parser.js
+- install edx courses: node parser/edx-parser.js
+- install outcomes database: node parser/outcomes-parser.js
 
 Run it!
 - node app.js
