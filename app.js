@@ -79,7 +79,7 @@ app.get('/wishlist', function(req, res) {
 
 app.get('/search', function(req, res){
   //Search computer science courses only
-  courseManager.find({cats:{$in:[1,11,12,17]}}, function(error, courses){
+  courseManager.find({cats:{$in:[1,11,12,17,10000,20000]}}, function(error, courses){
     uniManager.findAll(function(error, unis){
       catManager.findAll(function(error, cats){
         courses.forEach(function(course){

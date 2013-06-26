@@ -25,6 +25,7 @@ for (id in data.topics){
 			}
 		});
 		course.domains = domains;
+		course.link = "http://www.coursera.org/course/"+course.short_name;
 	}
 	courses.push(course);
 }
