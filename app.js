@@ -78,8 +78,12 @@ app.get('/wishlist', function(req, res) {
 });
 
 app.get('/search', function(req, res){
+  var searchObj = {cats:{$in:[1,11,12,17,10000,20000]}};
+  if(req.query.query){
+    searchObj.name = {$regex:req.query.query, $options: 'i'};
+  }
   //Search computer science courses only
-  courseManager.find({cats:{$in:[1,11,12,17,10000,20000]}}, function(error, courses){
+  courseManager.find(searchObj, function(error, courses){
     uniManager.findAll(function(error, unis){
       catManager.findAll(function(error, cats){
         courses.forEach(function(course){

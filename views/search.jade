@@ -1,25 +1,82 @@
 extends layout
 
 block content
-  - each course in courses
-    .media
-      img.pull-left.media-object(src=course.small_icon_hover)
-      .media-body
-        h4.media-heading= course.name
-        ul
-          li: <strong>Platform</strong>: 
-          = course.platform
-          li: <strong>Provider</strong>: 
-            - each uni in course.unisNames
-              = uni
-          li: <strong>Categories</strong>:
-            ul
-              - each cat in course.catsNames
-                li= cat
-        p
-          a.btn.btn-info(href=course.link, target='_blank') Enroll now!
-          |  
-          a.btn.btn-success(href='/evaluate/'+course.id) Add to my profile
+  .container-fluid
+    .row-fluid
+      .span3
+        label.checkbox
+          div: input(type='checkbox', checked)
+          strong All platforms
+          div: input(type='checkbox', name='platform')
+          | coursera
+          div: input(type='checkbox', name='platform')
+          | udacity
+          div: input(type='checkbox', name='platform')
+          | edx
+          hr
+          div: input(type='checkbox', checked)
+          strong All domains
+          div: input(type='checkbox', name='domain', value=1)
+          | Algorithms and Complexity
+          div: input(type='checkbox', name='domain', value=2)
+          | Architecture and Organization
+          div: input(type='checkbox', name='domain', value=3)
+          | Computational Science
+          div: input(type='checkbox', name='domain', value=4)
+          | Discrete Structures
+          div: input(type='checkbox', name='domain', value=5)
+          | Graphics and Visualization
+          div: input(type='checkbox', name='domain', value=6)
+          | Human-Computer Interaction
+          div: input(type='checkbox', name='domain', value=7)
+          | Information Assurance and Security
+          div: input(type='checkbox', name='domain', value=8)
+          | Information Management
+          div: input(type='checkbox', name='domain', value=9)
+          | Intelligent Systems
+          div: input(type='checkbox', name='domain', value=10)
+          | Networking and Communication
+          div: input(type='checkbox', name='domain', value=11)
+          | Operating Systems
+          div: input(type='checkbox', name='domain', value=12)
+          | Platform-Based Development
+          div: input(type='checkbox', name='domain', value=13)
+          | Parallel and Distributed Computing
+          div: input(type='checkbox', name='domain', value=14)
+          | Programming Languages
+          div: input(type='checkbox', name='domain', value=15)
+          | Software Development Fundamentals
+          div: input(type='checkbox', name='domain', value=16)
+          | Software Engineering
+          div: input(type='checkbox', name='domain', value=17)
+          | Systems Fundamentals
+          div: input(type='checkbox', name='domain', value=18)
+          | Social and Professional Practice
+      .span9
+        div: form.form-search(action='/search')
+          input.input-xxlarge.search-query(type='text', name='query')
+          | 
+          button.btn(type='submit') Search
+        ul.media-list
+          - each course in courses
+            li.media
+              img.pull-left.media-object(src=course.small_icon_hover)
+              .media-body
+                h4.media-heading= course.name
+                ul
+                  li: <strong>Platform</strong>: 
+                    = course.platform
+                  li: <strong>Provider</strong>: 
+                    - each uni in course.unisNames
+                      = uni
+                  li: <strong>Categories</strong>:
+                    ul
+                      - each cat in course.catsNames
+                        li= cat
+                p
+                  a.btn.btn-info(href=course.link, target='_blank') Enroll now!
+                  |  
+                  a.btn.btn-success(href='/evaluate/'+course.id) Add to my profile
 
 block header
   .masthead
