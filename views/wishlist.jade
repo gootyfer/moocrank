@@ -2,7 +2,6 @@ extends layout
 
 block content
   #outcomes.span12.accordion
-    - var currentSubcat;
     each cat in cats
       .accordion-group
         .accordion-heading
@@ -11,33 +10,22 @@ block content
         div(id='cat_' + cat.id).accordion-body.collapse
           .accordion-inner
             div(id='acc_cat_' + cat.id).span10.accordion
-              each outcome in cat.outcomes
-                - if(currentSubcat != outcome.subcat)
-                  - currentSubcat = outcome.subcat
-                    .accordion-group
-                      .accordion-heading
-                        a(href='#subcat_' + outcome.subcat, data-toggle='collapse', data-parent='outcomes').accordion-toggle
-                          h5= outcome.subcatName
-                label.checkbox
-                  div
-                    - if(outcomes && outcomes.indexOf(outcome.id)!=-1)
-                      input(type='checkbox', checked, onchange='changeOutcome("/unwishOutcome/'+outcome.id+'")')
-                    - else
-                      input(type='checkbox', onchange='changeOutcome("/wishOutcome/'+outcome.id+'")')
-                    =outcome.name
+              each subcat in cat.subcats
+                .accordion-group
+                  .accordion-heading
+                    a(href='#subcat_' + subcat.id, data-toggle='collapse', data-parent='acc_cat_' + cat.id).accordion-toggle
+                      h5= subcat.subcatName
+                div(id='subcat_' + subcat.id).accordion-body.collapse
+                  .accordion-inner
+                  each outcome in subcat.outcomes
+                    label.checkbox
+                      div
+                        - if(outcomes && outcomes.indexOf(outcome.id)!=-1)
+                          input(type='checkbox', checked, onchange='changeOutcome("/unwishOutcome/'+outcome.id+'")')
+                        - else
+                          input(type='checkbox', onchange='changeOutcome("/wishOutcome/'+outcome.id+'")')
+                        =outcome.name
 
 block append script
   script(src='/js/moocrank.js')
 
-block header
-  .masthead
-    h3.muted moocrank
-    .navbar
-      .navbar-inner
-        .container
-          ul.nav
-            li: a(href='/index.html') Home
-            li.active: a(href='/wishlist') Objectives
-            li: a(href='/search') Courses
-            li: a(href='#') Source Code
-            li: a(href='#') About

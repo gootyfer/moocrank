@@ -61,19 +61,8 @@ app.get('/all-courses', function(req, res){
 
 app.get('/wishlist', function(req, res) {
    outcomeManager.findAll(function(error, outcomes) {
-     var arrayByCats = {};
-     outcomes.map(function(outcome) {
-       if (outcome.cat in arrayByCats) {
-         arrayByCats[outcome.cat].outcomes.push(outcome);
-       } else {
-         arrayByCats[outcome.cat] = {
-           id: outcome.cat,
-           outcomes: [outcome],
-           catName: outcome.catName
-         };
-       }
-     });
-     res.render('wishlist', { title: 'Select outcomes', cats: arrayByCats});  
+     var outcomesTree = treeStructure(outcomes);
+     res.render('wishlist', { active: 1, title: 'Select outcomes', cats: outcomesTree});  
    }); 
 });
 
@@ -189,4 +178,33 @@ function searchCats(cats, catIds){
     }
   });
   return found;
+}
+
+function treeStructure(outcomes) {
+  var arrayByCats = {};
+  outcomes.map(function(outcome) {
+    var createSubcat = false;
+    if (outcome.cat in arrayByCats) {
+      if (outcome.subcat in arrayByCats[outcome.cat].subcats) {
+        arrayByCats[outcome.cat].subcats[outcome.subcat].outcomes.push(outcome);
+      } else {
+        createSubcat = true;
+      }
+    } else {
+      arrayByCats[outcome.cat] = {
+        id: outcome.cat,
+        catName: outcome.catName,
+        subcats: {}
+      };
+      createSubcat = true;
+    }
+    if (createSubcat) {
+      arrayByCats[outcome.cat].subcats[outcome.subcat] = {
+        id: outcome.subcat,
+        subcatName: outcome.subcatName,
+        outcomes: [outcome]  
+      };
+    }
+  });
+  return arrayByCats;
 }
