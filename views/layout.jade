@@ -8,6 +8,30 @@ html
   body
   .container
     block header
+      - var menuList = [ {title:'Home', link:'/'}, {title:'Objectives', link:'/wishlist'}, {title:'Courses', link:'/search'}, {title:'Source', link:'http://github.com/gootyfer/moocrank'}, {title:'About', link:'#'} ];
+      .masthead
+        h3.muted moocrank
+        .navbar
+          .navbar-inner
+            .container
+              ul.nav
+                - for(var i=0;i<menuList.length;i++)
+                  - if(i==active)
+                    li.active: a(href=menuList[i].link)= menuList[i].title
+                  - else
+                    li: a(href=menuList[i].link)= menuList[i].title
+                li: a(href='/signup') Sign up
+                li.dropdown
+                  a(href='#', data-toggle='dropdown').dropdown-toggle
+                    |Sign in
+                    strong.caret
+                  .dropdown-menu
+                    form(method='post', action='/login')
+                      input#username(placeholder='Username', name='username')
+                      input(type='password', placeholder='Password', name='password')
+                      label: or
+                      input#sign-in-google.btn.btn-primary.btn-block(type='button', value='Sign In with Google')
+                      input#sign-in-twitter.btn.btn-primary.btn-block(type='button', value='Sign In with Twitter')
     block content
     block footer
       .footer
@@ -16,16 +40,3 @@ html
     script(src='http://code.jquery.com/jquery.js')
     script(src='/bootstrap/js/bootstrap.min.js')
 
-mixin menu(active)
-  - var menuList = [ {title:'Home', link:'/'}, {title:'Objectives', link:'/wishlist'}, {title:'Courses', link:'/search'}, {title:'Source', link:'#'}, {title:'About', link:'#'} ];
-  .masthead
-    h3.muted moocrank
-    .navbar
-      .navbar-inner
-        .container
-          ul.nav
-            - for(var i=0;i<menuList.length;i++)
-              - if(i==active)
-                li.active: a(href=menuList[i].link)= menuList[i].title
-              - else
-                li: a(href=menuList[i].link)= menuList[i].title
