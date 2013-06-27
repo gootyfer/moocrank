@@ -8,7 +8,6 @@ html
   body
   .container
     block header
-      - var menuList = [ {title:'Home', link:'/'}, {title:'Objectives', link:'/wishlist'}, {title:'Courses', link:'/search'}, {title:'Source', link:'http://github.com/gootyfer/moocrank'}, {title:'About', link:'#'} ];
       .masthead
         h3.muted moocrank
         .navbar
@@ -28,7 +27,7 @@ html
                     a(href='#', data-toggle='dropdown', class=activeClass+'dropdown-toggle') Account 
                       strong.caret
                     ul.dropdown-menu
-                      li: a(href='/companies') Companies
+                      // li: a(href='/companies') Companies
                       li: a(href='/logout') Logout
     block content
     block footer

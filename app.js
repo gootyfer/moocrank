@@ -70,6 +70,13 @@ app.use(passport.initialize());
 app.use(passport.session());
 // pass session user to views
 app.use(function(req, res, next) {
+  res.locals.menuList = [ 
+    {title:'Home', link:'/'},
+    {title:'Objectives', link:'/wishlist'}, 
+    {title:'Courses', link:'/search'}, 
+    {title:'Source', link:'http://github.com/gootyfer/moocrank'}, 
+    {title:'About', link:'/about'}
+  ];
   res.locals.user = req.session.passport.user;
   next();
 });
@@ -300,6 +307,14 @@ app.get('/unwishOutcome/:outcomeId', ensureAuthenticated, function(req, res){
       if (err) res.send(500)
       else res.send(200);
     });
+  });
+});
+
+
+app.get('/about', function(req, res){
+  res.render('about', {
+    title: 'About',
+    active: 4
   });
 });
 
