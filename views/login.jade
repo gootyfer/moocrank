@@ -1,15 +1,37 @@
 extends layout
 
 block content
-  if message
-    .alert.alert-error= message
-  form(method='post', action='/login').form-horizontal
-    fieldset
-      .legend: legend Login
-      .control-group
-        input#username(placeholder='Username', name='username')
-      .control-group
-        input(type='password', placeholder='Password', name='password')
-      .control-group
-        input#sign-in.btn.btn-primary(type='submit', value='Sign In')
- 
+  .row-fluid
+    if message
+      div(class=messageType).alert= message
+    .span12
+      // Login in form
+      .span6
+        .area
+          form(method='post', action='/login').form-horizontal
+            .heading: h4.form-heading Login
+            fieldset
+              .control-group
+                input#email(placeholder='Email', name='email', type='email')
+              .control-group
+                input(type='password', placeholder='Password', name='password')
+              .control-group
+                input#sign-in.btn.btn-primary(type='submit', value='Sign In')
+
+      // Register form
+      .span6
+        .area
+          form(method='post', action='/register').form-horizontal
+            .heading: h4.form-heading Register
+            fieldset
+              .control-group                
+                input#firstname(placeholder='First name', name='user[firstname]')
+              .control-group
+                input#lastname(placeholder='Last name', name='user[lastname]')
+              .control-group
+                input#email(placeholder='Email', name='user[email]', type='email')
+              .control-group
+                input(type='password', placeholder='Password', name='user[password]')
+              .control-group
+                input#sign-in.btn.btn-primary(type='submit', value='Register')
+         

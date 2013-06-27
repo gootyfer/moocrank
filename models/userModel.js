@@ -5,12 +5,17 @@ var mongoose = require('mongoose')
   , SALT_WORK_FACTOR = 10;
 
 var userSchema = new mongoose.Schema({
-    username: {type: String, required: true, unique: true},
+    firstname: {type: String, required: true},
+    lastname: {type: String, required: true},
     email: {type: String, required: true, unique: true},
-    password: {type: String, required: true}
+    password: {type: String, required: true},
+    wishlist: [{id: Number}],
+    achievements: [{id: Number}],
+    enrolledCourses: [{id: Number}],
+    completedCourses: [{id: Number}]
 });
 
-userSchema.pre('save', function(exists) {
+userSchema.pre('save', function(next) {
   var user = this;
 
   if (!user.isModified('password')) return next();

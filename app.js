@@ -24,17 +24,30 @@ var config = require('./config.json');
 mongoose.connect('mongodb://' + config.database.url + ':' + config.database.port + '/' + config.database.name);
 var User = require('./models/userModel').User;
 
+// passport serialize and deserialize
+passport.serializeUser(function(user, done) {
+  done(null, user.id);
+});
+
+passport.deserializeUser(function(id, done) {
+  User.findById(id, function (err, user) {
+    done(err, user);
+  });
+});
+
 // register auth strategy
-passport.use(new LocalStrategy(function(username, password, done) {
-  User.findOne({username: username}, function(err, user) {
+passport.use(new LocalStrategy({
+    usernameField: 'email'
+  }, function(email, password, done) {
+  User.findOne({email: email}, function(err, user) {
     if (err) return done(err);
-    if (!user) return done(null, false, {message: 'Unknown user.'});
+    if (!user) return done(null, false, {messageType: '', message: 'Unknown user.'});
     user.comparePassword(password, function(err, isMatch) {
       if (err) return done(err);
       if (isMatch) {
         return done(null, user);
       } else {
-        return done(null, false, {message: 'Invalid password.'});
+        return done(null, false, {messageType: '', message: 'Invalid password.'});
       }
     });
   });
@@ -54,6 +67,11 @@ app.use(express.methodOverride());
 app.use(express.session({secret: 'brazil 2 - uruguay 1'}));
 app.use(passport.initialize());
 app.use(passport.session());
+// add user session to locals
+app.use(function(req, res, next) {
+  res.locals.user = req.session.user;
+  next();
+});
 app.use(app.router);
 app.use(require('stylus').middleware(__dirname + '/public'));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -192,7 +210,8 @@ app.get('/removeOutcome/:courseId/:outcomeId', function(req, res){
 app.get('/login', function(req, res, next) {
   res.render('login', {
     activate: 5,
-    user: req.user, 
+    title: 'Register / Login',
+    messageType: req.session.messageType,
     message: req.session.messages
   });
 });
@@ -201,19 +220,41 @@ app.post('/login', function(req, res, next) {
   passport.authenticate('local', function(err, user, info) {
     if (err) return next(err);
     if (!user) {
+      req.session.messageType = info.messageType;
       req.session.messages = [info.message];
       return res.redirect('/login'); 
     }
     req.logIn(user, function(err) {
       if (err) return next(err);
+      req.session.user = user;
       return res.redirect('/');
     });
   })(req, res, next);
 });
 
+// Logout
+
 app.get('/logout', function(req, res) {
   req.logout();
+  req.session.user = null;
   res.redirect('/');
+});
+
+// User registration
+app.post('/register', function(req, res) {
+  var user = new User(req.body.user);
+  var message = '';
+  user.save(function(err) {
+    if (err) {
+      console.log(err);
+      req.session.messageType = 'alert-error';
+      req.session.messages = ['There was an error in the registration process. Please try again later.'];
+    } else {
+      req.session.messageType = 'alert-info';
+      req.session.messages = ['You have been successfully registered. Please login.'];
+    }
+    res.redirect('/login');
+  });
 });
 
 //Helpers
