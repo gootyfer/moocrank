@@ -110,32 +110,36 @@ app.get('/search', ensureAuthenticated, function(req, res){
   if(req.query.query){
     searchObj.name = {$regex:req.query.query, $options: 'i'};
   }
-  //Search computer science courses only
-  courseManager.find(searchObj, function(error, courses){
-    uniManager.findAll(function(error, unis){
-      catManager.findAll(function(error, cats){
-        courses.forEach(function(course){
-          //Add unis names
-          course.unisNames = [];
-          if(course.unis){
-            var myUnis = searchUnis(unis, course.unis);
-            myUnis.forEach(function(uni){
-              course.unisNames.push(uni.name);
-            });
-          }
-          //Add cat names
-          course.catsNames = [];
-          if(course.cats){
-            var myCats = searchCats(cats, course.cats);
-            myCats.forEach(function(cat){
-              course.catsNames.push(cat.name);
-            });
-          }
-        });
-        res.render('search', {
-          active: 2,
-          title: 'Courses recommendation',
-          courses: courses
+  User.findById(req.session.passport.user, function(error, user){
+    searchObj.id = {$nin:user.completedCourses};
+    //Search computer science courses only
+    courseManager.find(searchObj, function(error, courses){
+      uniManager.findAll(function(error, unis){
+        catManager.findAll(function(error, cats){
+          courses.forEach(function(course){
+            //Add unis names
+            course.unisNames = [];
+            if(course.unis){
+              var myUnis = searchUnis(unis, course.unis);
+              myUnis.forEach(function(uni){
+                course.unisNames.push(uni.name);
+              });
+            }
+            //Add cat names
+            course.catsNames = [];
+            if(course.cats){
+              var myCats = searchCats(cats, course.cats);
+              myCats.forEach(function(cat){
+                course.catsNames.push(cat.name);
+              });
+            }
+          });
+          rankCourses(courses, user);
+          res.render('search', {
+            active: 2,
+            title: 'Courses recommendation',
+            courses: courses
+          });
         });
       });
     });
@@ -199,11 +203,9 @@ app.get('/toggleOutcomeOfCourse/:courseId/:outcomeId', ensureAuthenticated, func
 app.get('/addCourseAndOutcomesToUser/:courseId', ensureAuthenticated, function(req, res){
   courseManager.findById(parseInt(req.params.courseId), function(error, course){
     if(error) res.send(404);
-    console.log("course OK");
     User.findById(req.session.passport.user, function(error, user){
       if(error) res.send(404);
       else{
-        console.log("user OK");
         user.completedCourses.push(req.params.courseId);
         course.outcomes = course.outcomes? course.outcomes : [];
         course.outcomes.forEach(function(outcome){
@@ -212,7 +214,7 @@ app.get('/addCourseAndOutcomesToUser/:courseId', ensureAuthenticated, function(r
           }
         });
         user.save(function(error){
-          console.log("save error: "+error);
+          //console.log("save error: "+error);
           if(error) res.send(404);
           else res.redirect('/search');
         });
@@ -378,4 +380,30 @@ function treeStructure(outcomes) {
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) return next();
   res.redirect('/login');
+}
+
+function rankCourses(courses, user){
+  //console.log("NOT SORTED:");
+  //console.log(courses);
+  var diff = user.wishlist.filter(function(x){
+    return user.achievements.indexOf(x) == -1;
+  });
+  courses.sort(function(x,y){
+    var xRank = []
+      , yRank = [];
+    if(x.outcomes){
+      xRank = x.outcomes.filter(function(o){
+        return diff.indexOf(o) != -1;
+      });
+    }
+    if(y.outcomes){
+      yRank = y.outcomes.filter(function(o){
+        return diff.indexOf(o) != -1;
+      });
+    }
+    console.log(x.name+":"+xRank.length+" AND "+y.name+":"+yRank.length);
+    return yRank.length - xRank.length;
+  });
+  //console.log("SORTED:");
+  //console.log(courses);
 }
