@@ -7,11 +7,11 @@ block content
         label.checkbox
           div: input(type='checkbox', checked)
           strong All platforms
-          div: input(type='checkbox', name='platform')
+          div: input(type='checkbox', name='platform', value='coursera')
           | coursera
-          div: input(type='checkbox', name='platform')
+          div: input(type='checkbox', name='platform', value='udacity')
           | udacity
-          div: input(type='checkbox', name='platform')
+          div: input(type='checkbox', name='platform', value='edx')
           | edx
           hr
           div: input(type='checkbox', checked)
@@ -69,11 +69,13 @@ block content
                   li: <strong>Provider</strong>: 
                     - each uni in course.unisNames
                       = uni
-                  li: <strong>Categories</strong>:
-                    ul
-                      - each cat in course.catsNames
-                        li= cat
+                  //
+                    li: <strong>Categories</strong>:
+                      ul
+                        - each cat in course.catsNames
+                          li= cat
+                br
                 p
                   a.btn.btn-info(href=course.link, target='_blank') Enroll now!
                   |  
-                  a.btn.btn-success(href='/evaluate/'+course.id) Add to my profile
+                  a.btn.btn-success(href='/evaluate/'+course.id) I finished it!

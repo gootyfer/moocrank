@@ -15,10 +15,11 @@ block content
             - each cat in cats
               li= cat.name
       p
-        a.btn(href='/search') Back
+        a.btn(href='/search') Cancel
         |  
-        a.btn.btn-success(href='#') Save
+        a.btn.btn-success(href='/addCourseAndOutcomesToUser/'+course.id) Save to my Profile
     .span6
+      h3 Please, mark the achieved outcomes:
       - var currentCat;
       - var currentSubcat;
       - each outcome in outcomes
@@ -30,10 +31,8 @@ block content
           h5= outcome.subcatName
         label.checkbox
           div
-            - if(course.outcomes && course.outcomes.indexOf(outcome.id)!=-1)
-              input(type='checkbox', checked, onchange='changeOutcome("/removeOutcome/'+course.id+'/'+outcome.id+'")')
-            - else
-              input(type='checkbox', onchange='changeOutcome("/addOutcome/'+course.id+'/'+outcome.id+'")')
+            - var checked = (course.outcomes && course.outcomes.indexOf(outcome.id)!=-1);
+              input(type='checkbox', checked=checked, onchange='changeOutcome("/toggleOutcomeOfCourse/'+course.id+'/'+outcome.id+'?checked="+this.checked)')
             =outcome.name
 
 block append script

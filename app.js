@@ -169,34 +169,51 @@ app.get('/evaluate/:id', ensureAuthenticated, function(req, res){
   });
 });
 
-app.get('/addOutcome/:courseId/:outcomeId', ensureAuthenticated, function(req, res){
+app.get('/toggleOutcomeOfCourse/:courseId/:outcomeId', ensureAuthenticated, function(req, res){
   courseManager.findById(parseInt(req.params.courseId), function(error, course){
     if(error) res.send(404);
     else{
-      course.outcomes = course.outcomes? course.outcomes : [];
-      course.outcomes.push(parseInt(req.params.outcomeId));
-      courseManager.save(course, function(error, courses){
-        if(error) res.send(404);
-        else res.send(200);
-      });
-    }
-  });
-});
-
-app.get('/removeOutcome/:courseId/:outcomeId', ensureAuthenticated, function(req, res){
-  courseManager.findById(parseInt(req.params.id), function(error, course){
-    if(error || !course.outcomes) res.send(404);
-    else{
-      var outcomeIdIndex = course.outcomes.indexOf(parseInt(req.params.outcomeId));
-      if(outcomeIdIndex != -1){
-        //Remove from array
-        course.outcomes.splice(outcomeIdIndex,1);
+      if(req.query.checked=="true"){
+        course.outcomes = course.outcomes? course.outcomes : [];
+        course.outcomes.push(parseInt(req.params.outcomeId));
         courseManager.save(course, function(error, courses){
           if(error) res.send(404);
           else res.send(200);
         });
+      }else{
+        if(!course.outcomes) res.send(404);
+        var outcomeIdIndex = course.outcomes.indexOf(parseInt(req.params.outcomeId));
+        if(outcomeIdIndex != -1){
+          //Remove from array
+          course.outcomes.splice(outcomeIdIndex,1);
+          courseManager.save(course, function(error, courses){
+            if(error) res.send(404);
+            else res.send(200);
+          });
+        }
       }
     }
+  });
+});
+
+app.get('/addCourseAndOutcomesToUser/:courseId', ensureAuthenticated, function(req, res){
+  courseManager.findById(parseInt(req.params.courseId), function(error, course){
+    if(error) res.send(404);
+    console.log("course OK");
+    User.findById(req.session.passport.user, function(error, user){
+      if(error) res.send(404);
+      else{
+        console.log("user OK");
+        user.completedCourses.push(req.params.courseId);
+        course.outcomes = course.outcomes? course.outcomes : [];
+        user.achievements.push(course.outcomes);
+        user.save(function(error){
+          console.log("save error: "+error);
+          if(error) res.send(404);
+          else res.redirect('/search');
+        });
+      }
+    });
   });
 });
 
