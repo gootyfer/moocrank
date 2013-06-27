@@ -33,5 +33,11 @@ block content
               .control-group
                 input(type='password', placeholder='Password', name='user[password]')
               .control-group
+                input(type='checkbox', checked)
+                |  I accept the 
+                a(href='/terms/tos.txt') terms of service 
+                | and the 
+                a(href='/terms/privacy.txt') privacy policy
+              .control-group
                 input#sign-in.btn.btn-primary(type='submit', value='Register')
          
