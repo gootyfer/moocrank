@@ -1,11 +1,11 @@
 extends layout
 
 block content
-  #outcomes.span12.accordion
+  #wishlist.span12.accordion
     each cat in cats
       .accordion-group
         .accordion-heading
-          a(href='#cat_' + cat.id, data-toggle='collapse', data-parent='outcomes').accordion-toggle
+          a(href='#cat_' + cat.id, data-toggle='collapse', data-parent='wishlist').accordion-toggle
             h4= cat.catName
         div(id='cat_' + cat.id).accordion-body.collapse
           .accordion-inner
@@ -13,17 +13,15 @@ block content
               each subcat in cat.subcats
                 .accordion-group
                   .accordion-heading
-                    a(href='#subcat_' + subcat.id, data-toggle='collapse', data-parent='acc_cat_' + cat.id).accordion-toggle
+                    a(href='#subcat_' + cat.id + '_' + subcat.id, data-toggle='collapse', data-parent='acc_cat_' + cat.id).accordion-toggle
                       h5= subcat.subcatName
-                div(id='subcat_' + subcat.id).accordion-body.collapse
+                div(id='subcat_' + cat.id + '_' + subcat.id).accordion-body.collapse
                   .accordion-inner
                   each outcome in subcat.outcomes
                     label.checkbox
                       div
-                        - if(outcomes && outcomes.indexOf(outcome.id)!=-1)
-                          input(type='checkbox', checked, onchange='changeOutcome("/unwishOutcome/'+outcome.id+'")')
-                        - else
-                          input(type='checkbox', onchange='changeOutcome("/wishOutcome/'+outcome.id+'")')
+                        wChecked = wishlist && wishlist.indexOf(outcome.id) != -1;
+                        input(type='checkbox', checked=wChecked, onchange='changeOutcome("/" + (this.checked ? "" : "un") + "wishOutcome/'+outcome.id+'")')
                         =outcome.name
 
 block append script

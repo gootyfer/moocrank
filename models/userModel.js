@@ -9,10 +9,9 @@ var userSchema = new mongoose.Schema({
     lastname: {type: String, required: true},
     email: {type: String, required: true, unique: true},
     password: {type: String, required: true},
-    wishlist: [{id: Number}],
-    achievements: [{id: Number}],
-    enrolledCourses: [{id: Number}],
-    completedCourses: [{id: Number}]
+    wishlist: [Number],
+    achievements: [Number],
+    completedCourses: [Number]
 });
 
 userSchema.pre('save', function(next) {

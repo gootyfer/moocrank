@@ -1,3 +1,4 @@
+/*-- TO DO: Restructure and divide this file -- */
 
 /**
  * Module dependencies.
@@ -67,9 +68,9 @@ app.use(express.methodOverride());
 app.use(express.session({secret: 'brazil 2 - uruguay 1'}));
 app.use(passport.initialize());
 app.use(passport.session());
-// add user session to locals
+// pass session user to views
 app.use(function(req, res, next) {
-  res.locals.user = req.session.user;
+  res.locals.user = req.session.passport.user;
   next();
 });
 app.use(app.router);
@@ -102,13 +103,6 @@ app.get('/', function(req, res){
           active: 0
         });
   });
-});
-
-app.get('/wishlist', ensureAuthenticated, function(req, res) {
-   outcomeManager.findAll(function(error, outcomes) {
-     var outcomesTree = treeStructure(outcomes);
-     res.render('wishlist', { active: 1, title: 'Select outcomes', cats: outcomesTree});  
-   }); 
 });
 
 app.get('/search', ensureAuthenticated, function(req, res){
@@ -227,7 +221,6 @@ app.post('/login', function(req, res, next) {
     }
     req.logIn(user, function(err) {
       if (err) return next(err);
-      req.session.user = user;
       return res.redirect('/');
     });
   })(req, res, next);
@@ -237,7 +230,6 @@ app.post('/login', function(req, res, next) {
 
 app.get('/logout', function(req, res) {
   req.logout();
-  req.session.user = null;
   res.redirect('/');
 });
 
@@ -247,7 +239,6 @@ app.post('/register', function(req, res) {
   var message = '';
   user.save(function(err) {
     if (err) {
-      console.log(err);
       req.session.messageType = 'alert-error';
       req.session.messages = ['There was an error in the registration process. Please try again later.'];
     } else {
@@ -257,6 +248,61 @@ app.post('/register', function(req, res) {
     res.redirect('/login');
   });
 });
+
+
+// Outcomes wishlist
+
+app.get('/wishlist', ensureAuthenticated, function(req, res) {
+   outcomeManager.findAll(function(error, outcomes) {
+     var outcomesTree = treeStructure(outcomes);
+     User.findById(req.session.passport.user, function(err, user) {
+       res.render('wishlist', {
+         active: 1,
+         title: 'Select outcomes',
+         cats: outcomesTree,
+         wishlist: user.wishlist
+       });  
+     });
+   }); 
+});
+
+app.get('/wishOutcome/:outcomeId', ensureAuthenticated, function(req, res) {
+  User.findById(req.session.passport.user, function(err, user) {
+    if (err) {
+      res.send(404);
+      return;
+    }
+    if (!user.wishlist) {
+      user.wishlist = [];
+    }
+    user.wishlist.push(parseInt(req.params.outcomeId));
+    user.save(function(err) {
+      if (err) {
+        res.send(500);
+      } else {
+        res.send(200);
+      }
+    });
+  });
+});
+
+app.get('/unwishOutcome/:outcomeId', ensureAuthenticated, function(req, res){
+  User.findById(req.session.passport.user, function(err, user) {
+    if (err || !user.wishlist) {
+      res.send(404);
+      return;
+    }
+    var outcomeId = parseInt(req.params.outcomeId); 
+    user.wishlist = user.wishlist.filter(function(x) {
+      return(x != outcomeId);
+    });
+    user.save(function(err) {
+      if (err) res.send(500)
+      else res.send(200);
+    });
+  });
+});
+
 
 //Helpers
 function searchUnis(unis, uniIds){
