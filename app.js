@@ -50,12 +50,9 @@ var outcomeManager = new OutcomeManager(config.database.url, config.database.por
 
 //Routes
 
-app.get('/all-courses', function(req, res){
+app.get('/', function(req, res){
   courseManager.findAll(function(error, courses){
-    res.render('index', {
-      title: 'Courses',
-      courses: courses
-    });
+    res.render('index');
   });
 });
 
@@ -95,6 +92,7 @@ app.get('/search', function(req, res){
         });
         res.render('search', {
           title: 'Courses recommendation',
+          active: 2, 
           courses: courses
         });
       });
@@ -116,6 +114,7 @@ app.get('/evaluate/:id', function(req, res){
             //console.log(outcomes);
             res.render('evaluation', {
               title: 'Evaluate '+course.name,
+              active: 2, 
               course:course, 
               unis:unis, 
               cats:cats, 

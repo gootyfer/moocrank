@@ -1,15 +1,25 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
-  #courses
-    - each course in courses
-      div.course
-        span.name= course.name
-        ul
-          if course.outcomes  
-            - each outcome in course.outcomes
-              li outcome
-          li
-            a(href='#')= '+'
+  .jumbotron
+    h1 Push your career!
+    .lead Get personalised recommendations to orient your career. Take advantage using our competence-based search of Massive Open Online Courses (MOOCs).
+    a.btn.btn-large.btn-success(href='/search') Give it a try!
+  hr
+  .row-fluid
+    .span4
+      h2 1. Objectives
+      p Our personalised recommendations will take into account: your training objectives, what you already know and what your employer expect from you. Few minutes to enhance your life-long career. Deal?
+      p: a.btn(href='/wishlist')
+        | View details &raquo;
+    .span4
+      h2 2. Courses
+      p Get personalized course recommendations based on your objectives using our competence-based search of massive open online courses. We will also take into account your completed courses and the time devoted for training in your organization.
+      p: a.btn(href='/search')
+        | View details &raquo;
+    .span4
+      h2 3. Evaluation
+      p Give some feedback about the outcomes gained in the course and incorporate them to your personal profile. Show off your new skills!
+      p: a.btn(href='/search')
+        | View details &raquo;
+  hr
