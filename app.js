@@ -117,32 +117,36 @@ app.get('/search', ensureAuthenticated, function(req, res){
   if(req.query.query){
     searchObj.name = {$regex:req.query.query, $options: 'i'};
   }
-  //Search computer science courses only
-  courseManager.find(searchObj, function(error, courses){
-    uniManager.findAll(function(error, unis){
-      catManager.findAll(function(error, cats){
-        courses.forEach(function(course){
-          //Add unis names
-          course.unisNames = [];
-          if(course.unis){
-            var myUnis = searchUnis(unis, course.unis);
-            myUnis.forEach(function(uni){
-              course.unisNames.push(uni.name);
-            });
-          }
-          //Add cat names
-          course.catsNames = [];
-          if(course.cats){
-            var myCats = searchCats(cats, course.cats);
-            myCats.forEach(function(cat){
-              course.catsNames.push(cat.name);
-            });
-          }
-        });
-        res.render('search', {
-          active: 2,
-          title: 'Courses recommendation',
-          courses: courses
+  User.findById(req.session.passport.user, function(error, user){
+    searchObj.id = {$nin:user.completedCourses};
+    //Search computer science courses only
+    courseManager.find(searchObj, function(error, courses){
+      uniManager.findAll(function(error, unis){
+        catManager.findAll(function(error, cats){
+          courses.forEach(function(course){
+            //Add unis names
+            course.unisNames = [];
+            if(course.unis){
+              var myUnis = searchUnis(unis, course.unis);
+              myUnis.forEach(function(uni){
+                course.unisNames.push(uni.name);
+              });
+            }
+            //Add cat names
+            course.catsNames = [];
+            if(course.cats){
+              var myCats = searchCats(cats, course.cats);
+              myCats.forEach(function(cat){
+                course.catsNames.push(cat.name);
+              });
+            }
+          });
+          rankCourses(courses, user);
+          res.render('search', {
+            active: 2,
+            title: 'Courses recommendation',
+            courses: courses
+          });
         });
       });
     });
@@ -176,34 +180,53 @@ app.get('/evaluate/:id', ensureAuthenticated, function(req, res){
   });
 });
 
-app.get('/addOutcome/:courseId/:outcomeId', ensureAuthenticated, function(req, res){
+app.get('/toggleOutcomeOfCourse/:courseId/:outcomeId', ensureAuthenticated, function(req, res){
   courseManager.findById(parseInt(req.params.courseId), function(error, course){
     if(error) res.send(404);
     else{
-      course.outcomes = course.outcomes? course.outcomes : [];
-      course.outcomes.push(parseInt(req.params.outcomeId));
-      courseManager.save(course, function(error, courses){
-        if(error) res.send(404);
-        else res.send(200);
-      });
-    }
-  });
-});
-
-app.get('/removeOutcome/:courseId/:outcomeId', ensureAuthenticated, function(req, res){
-  courseManager.findById(parseInt(req.params.id), function(error, course){
-    if(error || !course.outcomes) res.send(404);
-    else{
-      var outcomeIdIndex = course.outcomes.indexOf(parseInt(req.params.outcomeId));
-      if(outcomeIdIndex != -1){
-        //Remove from array
-        course.outcomes.splice(outcomeIdIndex,1);
+      if(req.query.checked=="true"){
+        course.outcomes = course.outcomes? course.outcomes : [];
+        course.outcomes.push(parseInt(req.params.outcomeId));
         courseManager.save(course, function(error, courses){
           if(error) res.send(404);
           else res.send(200);
         });
+      }else{
+        if(!course.outcomes) res.send(404);
+        var outcomeIdIndex = course.outcomes.indexOf(parseInt(req.params.outcomeId));
+        if(outcomeIdIndex != -1){
+          //Remove from array
+          course.outcomes.splice(outcomeIdIndex,1);
+          courseManager.save(course, function(error, courses){
+            if(error) res.send(404);
+            else res.send(200);
+          });
+        }
       }
     }
+  });
+});
+
+app.get('/addCourseAndOutcomesToUser/:courseId', ensureAuthenticated, function(req, res){
+  courseManager.findById(parseInt(req.params.courseId), function(error, course){
+    if(error) res.send(404);
+    User.findById(req.session.passport.user, function(error, user){
+      if(error) res.send(404);
+      else{
+        user.completedCourses.push(req.params.courseId);
+        course.outcomes = course.outcomes? course.outcomes : [];
+        course.outcomes.forEach(function(outcome){
+          if(user.achievements.indexOf(outcome==-1)){
+            user.achievements.push(outcome);
+          }
+        });
+        user.save(function(error){
+          //console.log("save error: "+error);
+          if(error) res.send(404);
+          else res.redirect('/search');
+        });
+      }
+    });
   });
 });
 
@@ -372,4 +395,30 @@ function treeStructure(outcomes) {
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) return next();
   res.redirect('/login');
+}
+
+function rankCourses(courses, user){
+  //console.log("NOT SORTED:");
+  //console.log(courses);
+  var diff = user.wishlist.filter(function(x){
+    return user.achievements.indexOf(x) == -1;
+  });
+  courses.sort(function(x,y){
+    var xRank = []
+      , yRank = [];
+    if(x.outcomes){
+      xRank = x.outcomes.filter(function(o){
+        return diff.indexOf(o) != -1;
+      });
+    }
+    if(y.outcomes){
+      yRank = y.outcomes.filter(function(o){
+        return diff.indexOf(o) != -1;
+      });
+    }
+    console.log(x.name+":"+xRank.length+" AND "+y.name+":"+yRank.length);
+    return yRank.length - xRank.length;
+  });
+  //console.log("SORTED:");
+  //console.log(courses);
 }
