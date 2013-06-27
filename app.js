@@ -206,7 +206,11 @@ app.get('/addCourseAndOutcomesToUser/:courseId', ensureAuthenticated, function(r
         console.log("user OK");
         user.completedCourses.push(req.params.courseId);
         course.outcomes = course.outcomes? course.outcomes : [];
-        user.achievements.push(course.outcomes);
+        course.outcomes.forEach(function(outcome){
+          if(user.achievements.indexOf(outcome==-1)){
+            user.achievements.push(outcome);
+          }
+        });
         user.save(function(error){
           console.log("save error: "+error);
           if(error) res.send(404);
