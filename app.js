@@ -79,7 +79,10 @@ var outcomeManager = new OutcomeManager(config.database.url, config.database.por
 
 app.get('/', function(req, res){
   courseManager.findAll(function(error, courses){
-    res.render('index');
+    res.render('index', {
+          title: 'moocrank',
+          active: 0
+        });
   });
 });
 
