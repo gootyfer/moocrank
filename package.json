@@ -22,7 +22,11 @@
       "express": "3.2.6",
       "jade": "*",
       "stylus": "*",
-      "scraper": "latest"
+      "scraper": "latest",
+      "bcrypt": "latest",
+      "mongoose": "latest",
+      "passport": "latest",
+      "passport-local": "latest"
   }
   , "engines": {
       "node": "0.10.8",

@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  if message
+    .alert.alert-error= message
+  form(method='post', action='/login').form-horizontal
+    fieldset
+      .legend: legend Login
+      .control-group
+        input#username(placeholder='Username', name='username')
+      .control-group
+        input(type='password', placeholder='Password', name='password')
+      .control-group
+        input#sign-in.btn.btn-primary(type='submit', value='Sign In')
+ 

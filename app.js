@@ -9,13 +9,36 @@ var express = require('express')
 //  , wishlist = require('./routes/wishlist')
   , http = require('http')
   , path = require('path')
+  , passport = require('passport')
+  , mongoose = require('mongoose')
+  , LocalStrategy = require('passport-local').Strategy
   , CatManager = require('./models/catManager').CatManager
   , UniManager = require('./models/uniManager').UniManager
   , OutcomeManager = require('./models/outcomeManager').OutcomeManager
-  , CourseManager = require('./models/courseManager').CourseManager ;
+  , CourseManager = require('./models/courseManager').CourseManager;
 
 //config file
 var config = require('./config.json');
+
+// mongoose connection and models
+mongoose.connect('mongodb://' + config.database.url + ':' + config.database.port + '/' + config.database.name);
+var User = require('./models/userModel').User;
+
+// register auth strategy
+passport.use(new LocalStrategy(function(username, password, done) {
+  User.findOne({username: username}, function(err, user) {
+    if (err) return done(err);
+    if (!user) return done(null, false, {message: 'Unknown user.'});
+    user.comparePassword(password, function(err, isMatch) {
+      if (err) return done(err);
+      if (isMatch) {
+        return done(null, user);
+      } else {
+        return done(null, false, {message: 'Invalid password.'});
+      }
+    });
+  });
+}));
 
 var app = express();
 
@@ -25,8 +48,12 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 app.use(express.favicon());
 app.use(express.logger('dev'));
+app.use(express.cookieParser());
 app.use(express.bodyParser());
 app.use(express.methodOverride());
+app.use(express.session({secret: 'brazil 2 - uruguay 1'}));
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(app.router);
 app.use(require('stylus').middleware(__dirname + '/public'));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -59,7 +86,7 @@ app.get('/all-courses', function(req, res){
   });
 });
 
-app.get('/wishlist', function(req, res) {
+app.get('/wishlist', ensureAuthenticated, function(req, res) {
    outcomeManager.findAll(function(error, outcomes) {
      var outcomesTree = treeStructure(outcomes);
      res.render('wishlist', { active: 1, title: 'Select outcomes', cats: outcomesTree});  
@@ -94,6 +121,7 @@ app.get('/search', function(req, res){
           }
         });
         res.render('search', {
+          active: 2,
           title: 'Courses recommendation',
           courses: courses
         });
@@ -115,6 +143,7 @@ app.get('/evaluate/:id', function(req, res){
             //console.log(cats);
             //console.log(outcomes);
             res.render('evaluation', {
+              active: 2,
               title: 'Evaluate '+course.name,
               course:course, 
               unis:unis, 
@@ -157,6 +186,35 @@ app.get('/removeOutcome/:courseId/:outcomeId', function(req, res){
       }
     }
   });
+});
+
+// User login
+
+app.get('/login', function(req, res, next) {
+  res.render('login', {
+    activate: 5,
+    user: req.user, 
+    message: req.session.messages
+  });
+});
+
+app.post('/login', function(req, res, next) {
+  passport.authenticate('local', function(err, user, info) {
+    if (err) return next(err);
+    if (!user) {
+      req.session.messages = [info.message];
+      return res.redirect('/login'); 
+    }
+    req.logIn(user, function(err) {
+      if (err) return next(err);
+      return res.redirect('/');
+    });
+  })(req, res, next);
+});
+
+app.get('/logout', function(req, res) {
+  req.logout();
+  res.redirect('/');
 });
 
 //Helpers
@@ -207,4 +265,9 @@ function treeStructure(outcomes) {
     }
   });
   return arrayByCats;
+}
+
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) return next();
+  res.redirect('/login');
 }
