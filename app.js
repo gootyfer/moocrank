@@ -93,7 +93,7 @@ app.get('/wishlist', ensureAuthenticated, function(req, res) {
    }); 
 });
 
-app.get('/search', function(req, res){
+app.get('/search', ensureAuthenticated, function(req, res){
   var searchObj = {cats:{$in:[1,11,12,17,10000,20000]}};
   if(req.query.query){
     searchObj.name = {$regex:req.query.query, $options: 'i'};
@@ -123,7 +123,6 @@ app.get('/search', function(req, res){
         res.render('search', {
           active: 2,
           title: 'Courses recommendation',
-          active: 2, 
           courses: courses
         });
       });
@@ -131,7 +130,7 @@ app.get('/search', function(req, res){
   });
 });
 
-app.get('/evaluate/:id', function(req, res){
+app.get('/evaluate/:id', ensureAuthenticated, function(req, res){
   //console.log(req.params.id);
   courseManager.findById(parseInt(req.params.id), function(error, course){
     if(error) res.send(404, 'Sorry, we cannot find that!');
@@ -146,7 +145,6 @@ app.get('/evaluate/:id', function(req, res){
             res.render('evaluation', {
               active: 2,
               title: 'Evaluate '+course.name,
-              active: 2, 
               course:course, 
               unis:unis, 
               cats:cats, 
@@ -159,7 +157,7 @@ app.get('/evaluate/:id', function(req, res){
   });
 });
 
-app.get('/addOutcome/:courseId/:outcomeId', function(req, res){
+app.get('/addOutcome/:courseId/:outcomeId', ensureAuthenticated, function(req, res){
   courseManager.findById(parseInt(req.params.courseId), function(error, course){
     if(error) res.send(404);
     else{
@@ -173,7 +171,7 @@ app.get('/addOutcome/:courseId/:outcomeId', function(req, res){
   });
 });
 
-app.get('/removeOutcome/:courseId/:outcomeId', function(req, res){
+app.get('/removeOutcome/:courseId/:outcomeId', ensureAuthenticated, function(req, res){
   courseManager.findById(parseInt(req.params.id), function(error, course){
     if(error || !course.outcomes) res.send(404);
     else{
