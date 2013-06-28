@@ -34,6 +34,3 @@ block content
             - var checked = (course.outcomes && course.outcomes.indexOf(outcome.id)!=-1);
               input(type='checkbox', checked=checked, onchange='changeOutcome("/toggleOutcomeOfCourse/'+course.id+'/'+outcome.id+'?checked="+this.checked)')
             =outcome.name
-
-block append script
-  script(src='/js/moocrank.js')
