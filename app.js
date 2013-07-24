@@ -106,16 +106,22 @@ var outcomeManager = new OutcomeManager(config.database.url, config.database.por
 
 //Routes
 
+//Route: Home page
 app.get('/', function(req, res){
-  courseManager.findAll(function(error, courses){
+  if(req.session.passport.user){
+    res.redirect('/search');
+  }else{
     res.render('index', {
           title: 'moocrank',
           active: 0
         });
-  });
+  }
 });
 
+//Route: Search page
 app.get('/search', ensureLoggedIn('/login'), function(req, res){
+  //console.log(req.session.passport.user);
+  //Categories of computer science from coursera, edx and udacity
   var searchObj = {cats:{$in:[1,11,12,17,10000,20000]}};
   if(req.query.query){
     searchObj.name = {$regex:req.query.query, $options: 'i'};
@@ -156,6 +162,7 @@ app.get('/search', ensureLoggedIn('/login'), function(req, res){
   });
 });
 
+//Route: Course detail page
 app.get('/evaluate/:id', ensureLoggedIn('/login'), function(req, res){
   //console.log(req.params.id);
   courseManager.findById(parseInt(req.params.id), function(error, course){
@@ -183,46 +190,35 @@ app.get('/evaluate/:id', ensureLoggedIn('/login'), function(req, res){
   });
 });
 
-app.get('/toggleOutcomeOfCourse/:courseId/:outcomeId', ensureLoggedIn('/login'), function(req, res){
-  courseManager.findById(parseInt(req.params.courseId), function(error, course){
-    if(error) res.send(404);
-    else{
-      if(req.query.checked=="true"){
-        course.outcomes = course.outcomes? course.outcomes : [];
-        course.outcomes.push(parseInt(req.params.outcomeId));
-        courseManager.save(course, function(error, courses){
-          if(error) res.send(404);
-          else res.send(200);
-        });
-      }else{
-        if(!course.outcomes) res.send(404);
-        var outcomeIdIndex = course.outcomes.indexOf(parseInt(req.params.outcomeId));
-        if(outcomeIdIndex != -1){
-          //Remove from array
-          course.outcomes.splice(outcomeIdIndex,1);
-          courseManager.save(course, function(error, courses){
-            if(error) res.send(404);
-            else res.send(200);
-          });
-        }
-      }
-    }
-  });
-});
-
+//Route: Add outcome and course to user
 app.get('/addCourseAndOutcomesToUser/:courseId', ensureLoggedIn('/login'), function(req, res){
-  courseManager.findById(parseInt(req.params.courseId), function(error, course){
+  var outcomes = [];
+  for(outcome in req.query){
+    outcomes.push(parseInt(outcome));
+  }
+  //console.log(outcomes);
+  //console.log(req.query);
+  var courseId = parseInt(req.params.courseId);
+  courseManager.findById(courseId, function(error, course){
     if(error) res.send(404);
     User.findById(req.session.passport.user, function(error, user){
       if(error) res.send(404);
       else{
-        user.completedCourses.push(req.params.courseId);
-        course.outcomes = course.outcomes? course.outcomes : [];
-        course.outcomes.forEach(function(outcome){
-          if(user.achievements.indexOf(outcome==-1)){
-            user.achievements.push(outcome);
-          }
-        });
+
+        user.completedCourses = mergeArrays(user.completedCourses, courseId);
+
+        if(outcomes.length>0){
+          //Update course
+          course.userEvaluations = course.userEvaluations? course.userEvaluations : [];
+          course.userEvaluations.push(outcomes);
+          //Recalculate outcomes
+          recalculateCourseOutcomes(course);
+          //Save course info, not wait for response
+          courseManager.save(course, function(){});
+          //Update user
+          user.achievements = mergeArrays(user.achievements, outcomes);
+          user.courseScores.push({courseId:courseId, courseOutcomes: outcomes});
+        }
         user.save(function(error){
           //console.log("save error: "+error);
           if(error) res.send(404);
@@ -233,8 +229,7 @@ app.get('/addCourseAndOutcomesToUser/:courseId', ensureLoggedIn('/login'), funct
   });
 });
 
-// User login
-
+//Route: User login page
 app.get('/login', function(req, res, next) {
   var errorMsg = req.flash()['error'];
   errorMsg = errorMsg?errorMsg[0]:undefined;
@@ -242,40 +237,44 @@ app.get('/login', function(req, res, next) {
   res.render('login', {
     activate: 5,
     title: 'Register / Login',
-    messageType: 'error',
+    messageType: 'alert-error',
     message: errorMsg
   });
 });
 
+//Route: User login
 app.post('/login', passport.authenticate('local', 
   { successReturnToOrRedirect: '/', failureRedirect: '/login', failureFlash: true }));
 
-// Logout
-
+//Route: Logout
 app.get('/logout', function(req, res) {
   req.logout();
   res.redirect('/');
 });
 
-// User registration
+//Route: Registration new user
 app.post('/register', function(req, res) {
   var user = new User(req.body.user);
   var message = '';
   user.save(function(err) {
     if (err) {
+      //console.log(err);
       req.session.messageType = 'alert-error';
-      req.session.messages = ['There was an error in the registration process. Please try again later.'];
+      req.session.message = 'There was an error in the registration process. Please try again later.';
+      res.redirect('/login');
     } else {
-      req.session.messageType = 'alert-info';
-      req.session.messages = ['You have been successfully registered. Please login.'];
+      //console.log(user);
+      //Log the user in and redirect to wishlist
+      req.login(user, function(err) {
+        if (err) { return next(err); }
+        return res.redirect('/wishlist');
+      });
     }
-    res.redirect('/login');
   });
 });
 
 
-// Outcomes wishlist
-
+//Route: Outcomes wishlist page
 app.get('/wishlist', ensureLoggedIn('/login'), function(req, res) {
    outcomeManager.findAll(function(error, outcomes) {
      var outcomesTree = treeStructure(outcomes);
@@ -290,6 +289,7 @@ app.get('/wishlist', ensureLoggedIn('/login'), function(req, res) {
    }); 
 });
 
+//Route: add wished outcome to user
 app.get('/wishOutcome/:outcomeId', ensureLoggedIn('/login'), function(req, res) {
   User.findById(req.session.passport.user, function(err, user) {
     if (err) {
@@ -310,6 +310,7 @@ app.get('/wishOutcome/:outcomeId', ensureLoggedIn('/login'), function(req, res) 
   });
 });
 
+//Route: remove wished outcome from user
 app.get('/unwishOutcome/:outcomeId', ensureLoggedIn('/login'), function(req, res){
   User.findById(req.session.passport.user, function(err, user) {
     if (err || !user.wishlist) {
@@ -327,7 +328,7 @@ app.get('/unwishOutcome/:outcomeId', ensureLoggedIn('/login'), function(req, res
   });
 });
 
-
+//Route: about page
 app.get('/about', function(req, res){
   res.render('about', {
     title: 'About',
@@ -410,4 +411,30 @@ function rankCourses(courses, user){
   });
   //console.log("SORTED:");
   //console.log(courses);
+}
+
+function mergeArrays(a,b){
+  var c = a.concat(b);
+  return c.filter(function(elem, pos, self) {
+      return self.indexOf(elem) == pos;
+  })
+}
+
+function recalculateCourseOutcomes(course){
+  var outcomesRank = {};
+  course.userEvaluations.forEach(function(userEvaluation){
+    userEvaluation.forEach(function(outcome){
+      if(outcome in outcomesRank){
+        outcomesRank[outcome] += 1;
+      }else{
+        outcomesRank[outcome] = 1;
+      }
+    });
+  });
+  course.outcomes = [];
+  for(outcome in outcomesRank){
+    if(outcomesRank[outcome] >= (course.userEvaluations.length/2)){
+      course.outcomes.push(parseInt(outcome));
+    }
+  }
 }

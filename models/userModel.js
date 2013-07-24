@@ -11,7 +11,8 @@ var userSchema = new mongoose.Schema({
     password: {type: String, required: true},
     wishlist: [Number],
     achievements: [Number],
-    completedCourses: [Number]
+    completedCourses: [Number],
+    courseScores: [{courseId: Number, courseOutcomes: [Number]}]
 });
 
 userSchema.pre('save', function(next) {

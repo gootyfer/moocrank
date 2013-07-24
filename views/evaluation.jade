@@ -2,35 +2,36 @@ extends layout
 
 block content
   .row
-    .span6
-      img(src= course.large_icon)
-      h4= course.name
-      ul
-        li: <strong>Platform</strong>: 
-          =course.platform
-        li: <strong>Provider</strong>: 
-          =unis[0].name
-        li <strong>Categories</strong>:
-          ul
-            - each cat in cats
-              li= cat.name
-      p
-        a.btn(href='/search') Cancel
-        |  
-        a.btn.btn-success(href='/addCourseAndOutcomesToUser/'+course.id) Save to my Profile
-    .span6
-      h3 Please, mark the achieved outcomes:
-      - var currentCat;
-      - var currentSubcat;
-      - each outcome in outcomes
-        - if(currentCat != outcome.cat)
-          - currentCat = outcome.cat
-          h4= outcome.catName
-        - if(currentSubcat != outcome.subcat)
-          - currentSubcat = outcome.subcat
-          h5= outcome.subcatName
-        label.checkbox
-          div
-            - var checked = (course.outcomes && course.outcomes.indexOf(outcome.id)!=-1);
-              input(type='checkbox', checked=checked, onchange='changeOutcome("/toggleOutcomeOfCourse/'+course.id+'/'+outcome.id+'?checked="+this.checked)')
-            =outcome.name
+    form(action='/addCourseAndOutcomesToUser/'+course.id)
+      .span6
+        img(src= course.large_icon)
+        h4= course.name
+        ul
+          li: <strong>Platform</strong>: 
+            =course.platform
+          li: <strong>Provider</strong>: 
+            =unis[0].name
+          li <strong>Categories</strong>:
+            ul
+              - each cat in cats
+                li= cat.name
+        p
+          a.btn(href='/search') Cancel
+          |  
+          input.btn.btn-success(type='submit', value='Save to my Profile')
+      .span6
+        h3 Please, mark the achieved outcomes:
+        - var currentCat;
+        - var currentSubcat;
+        - each outcome in outcomes
+          - if(currentCat != outcome.cat)
+            - currentCat = outcome.cat
+            h4= outcome.catName
+          - if(currentSubcat != outcome.subcat)
+            - currentSubcat = outcome.subcat
+            h5= outcome.subcatName
+          label.checkbox
+            div
+              - var checked = (course.outcomes && course.outcomes.indexOf(outcome.id)!=-1);
+                input(name=outcome.id, type='checkbox', checked=checked)
+              =outcome.name
