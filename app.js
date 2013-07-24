@@ -13,6 +13,8 @@ var express = require('express')
   , passport = require('passport')
   , mongoose = require('mongoose')
   , LocalStrategy = require('passport-local').Strategy
+  , ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn
+  , flash = require('connect-flash')
   , CatManager = require('./models/catManager').CatManager
   , UniManager = require('./models/uniManager').UniManager
   , OutcomeManager = require('./models/outcomeManager').OutcomeManager
@@ -68,6 +70,7 @@ app.use(express.methodOverride());
 app.use(express.session({secret: 'brazil 2 - uruguay 1'}));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(flash());
 // pass session user to views
 app.use(function(req, res, next) {
   res.locals.menuList = [ 
@@ -112,7 +115,7 @@ app.get('/', function(req, res){
   });
 });
 
-app.get('/search', ensureAuthenticated, function(req, res){
+app.get('/search', ensureLoggedIn('/login'), function(req, res){
   var searchObj = {cats:{$in:[1,11,12,17,10000,20000]}};
   if(req.query.query){
     searchObj.name = {$regex:req.query.query, $options: 'i'};
@@ -153,7 +156,7 @@ app.get('/search', ensureAuthenticated, function(req, res){
   });
 });
 
-app.get('/evaluate/:id', ensureAuthenticated, function(req, res){
+app.get('/evaluate/:id', ensureLoggedIn('/login'), function(req, res){
   //console.log(req.params.id);
   courseManager.findById(parseInt(req.params.id), function(error, course){
     if(error) res.send(404, 'Sorry, we cannot find that!');
@@ -180,7 +183,7 @@ app.get('/evaluate/:id', ensureAuthenticated, function(req, res){
   });
 });
 
-app.get('/toggleOutcomeOfCourse/:courseId/:outcomeId', ensureAuthenticated, function(req, res){
+app.get('/toggleOutcomeOfCourse/:courseId/:outcomeId', ensureLoggedIn('/login'), function(req, res){
   courseManager.findById(parseInt(req.params.courseId), function(error, course){
     if(error) res.send(404);
     else{
@@ -207,7 +210,7 @@ app.get('/toggleOutcomeOfCourse/:courseId/:outcomeId', ensureAuthenticated, func
   });
 });
 
-app.get('/addCourseAndOutcomesToUser/:courseId', ensureAuthenticated, function(req, res){
+app.get('/addCourseAndOutcomesToUser/:courseId', ensureLoggedIn('/login'), function(req, res){
   courseManager.findById(parseInt(req.params.courseId), function(error, course){
     if(error) res.send(404);
     User.findById(req.session.passport.user, function(error, user){
@@ -233,28 +236,19 @@ app.get('/addCourseAndOutcomesToUser/:courseId', ensureAuthenticated, function(r
 // User login
 
 app.get('/login', function(req, res, next) {
+  var errorMsg = req.flash()['error'];
+  errorMsg = errorMsg?errorMsg[0]:undefined;
+  //console.log(errorMsg)
   res.render('login', {
     activate: 5,
     title: 'Register / Login',
-    messageType: req.session.messageType,
-    message: req.session.messages
+    messageType: 'error',
+    message: errorMsg
   });
 });
 
-app.post('/login', function(req, res, next) {
-  passport.authenticate('local', function(err, user, info) {
-    if (err) return next(err);
-    if (!user) {
-      req.session.messageType = info.messageType;
-      req.session.messages = [info.message];
-      return res.redirect('/login'); 
-    }
-    req.logIn(user, function(err) {
-      if (err) return next(err);
-      return res.redirect('/');
-    });
-  })(req, res, next);
-});
+app.post('/login', passport.authenticate('local', 
+  { successReturnToOrRedirect: '/', failureRedirect: '/login', failureFlash: true }));
 
 // Logout
 
@@ -282,7 +276,7 @@ app.post('/register', function(req, res) {
 
 // Outcomes wishlist
 
-app.get('/wishlist', ensureAuthenticated, function(req, res) {
+app.get('/wishlist', ensureLoggedIn('/login'), function(req, res) {
    outcomeManager.findAll(function(error, outcomes) {
      var outcomesTree = treeStructure(outcomes);
      User.findById(req.session.passport.user, function(err, user) {
@@ -296,7 +290,7 @@ app.get('/wishlist', ensureAuthenticated, function(req, res) {
    }); 
 });
 
-app.get('/wishOutcome/:outcomeId', ensureAuthenticated, function(req, res) {
+app.get('/wishOutcome/:outcomeId', ensureLoggedIn('/login'), function(req, res) {
   User.findById(req.session.passport.user, function(err, user) {
     if (err) {
       res.send(404);
@@ -316,7 +310,7 @@ app.get('/wishOutcome/:outcomeId', ensureAuthenticated, function(req, res) {
   });
 });
 
-app.get('/unwishOutcome/:outcomeId', ensureAuthenticated, function(req, res){
+app.get('/unwishOutcome/:outcomeId', ensureLoggedIn('/login'), function(req, res){
   User.findById(req.session.passport.user, function(err, user) {
     if (err || !user.wishlist) {
       res.send(404);
@@ -392,11 +386,6 @@ function treeStructure(outcomes) {
   return arrayByCats;
 }
 
-function ensureAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) return next();
-  res.redirect('/login');
-}
-
 function rankCourses(courses, user){
   //console.log("NOT SORTED:");
   //console.log(courses);
@@ -416,7 +405,7 @@ function rankCourses(courses, user){
         return diff.indexOf(o) != -1;
       });
     }
-    console.log(x.name+":"+xRank.length+" AND "+y.name+":"+yRank.length);
+    //console.log(x.name+":"+xRank.length+" AND "+y.name+":"+yRank.length);
     return yRank.length - xRank.length;
   });
   //console.log("SORTED:");
