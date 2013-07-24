@@ -8,34 +8,30 @@ html
   body
   .container
     block header
-      .masthead
+      //.masthead
         h3.muted moocrank
-        .navbar
-          .navbar-inner
-            .container
-              ul.nav
-                - for(var i=0; i< menuList.length;i++)
-                  - if(i==active)
-                    li.active: a(href=menuList[i].link)= menuList[i].title
-                  - else
-                    li: a(href=menuList[i].link)= menuList[i].title
-                li.dropdown
-                  - var activeClass = ( active == 5 ? 'active ' : '');
-                  if !user 
-                    a(href='/login', class=activeClass) Register / Login
-                  else
-                    a(href='#', data-toggle='dropdown', class=activeClass+'dropdown-toggle') Account 
-                      strong.caret
-                    ul.dropdown-menu
-                      // li: a(href='/companies') Companies
-                      li: a(href='/logout') Logout
+      .navbar
+        .navbar-inner
+          a.brand(href='/') moocrank
+          ul.nav.pull-right
+            if user
+              li: a(href='/') My Recommendations
+              li: a(href='/wishlist') My Learning Objectives
+            li.dropdown
+              if !user 
+                a(href='/login') Register / Login
+              else
+                a(href='#', data-toggle='dropdown', class='dropdown-toggle') Account 
+                  strong.caret
+                ul.dropdown-menu
+                  // li: a(href='/companies') Companies
+                  li: a(href='/logout') Logout
     block content
     block footer
       footer.footer
-        p Universidad Carlos III de Madrid
-          span.pull-right
-            | Contact us at 
-            a(href='mailto:info@moocrank.com') info@moocrank.com
+        a(href='/about') About us
+        span.pull-right Contact at 
+          a(href='mailto:info@moocrank.com') info@moocrank.com
   block script
     script(src='http://code.jquery.com/jquery.js')
     script(src='/bootstrap/js/bootstrap.min.js')

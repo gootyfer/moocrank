@@ -73,13 +73,13 @@ app.use(passport.session());
 app.use(flash());
 // pass session user to views
 app.use(function(req, res, next) {
-  res.locals.menuList = [ 
-    {title:'Home', link:'/'},
-    {title:'Objectives', link:'/wishlist'}, 
-    {title:'Courses', link:'/search'}, 
+//  res.locals.menuList = [ 
+//    {title:'Home', link:'/'},
+//    {title:'Objectives', link:'/wishlist'}, 
+//    {title:'Courses', link:'/search'}, 
 //    {title:'Source', link:'http://github.com/gootyfer/moocrank'}, 
-    {title:'About', link:'/about'}
-  ];
+//    {title:'About', link:'/about'}
+//  ];
   res.locals.user = req.session.passport.user;
   next();
 });
@@ -235,7 +235,7 @@ app.get('/login', function(req, res, next) {
   errorMsg = errorMsg?errorMsg[0]:undefined;
   //console.log(errorMsg)
   res.render('login', {
-    activate: 5,
+    activate: 4,
     title: 'Register / Login',
     messageType: 'alert-error',
     message: errorMsg

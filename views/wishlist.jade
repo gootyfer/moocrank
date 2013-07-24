@@ -1,7 +1,7 @@
 extends layout
 
 block content
-  h1.text-center What are your learning objectives?
+  h1.jumbotron What are my learning objectives?
   .accordion
     each cat in cats
       .accordion-group
@@ -24,4 +24,7 @@ block content
                         wChecked = wishlist && wishlist.indexOf(outcome.id) != -1;
                         input(type='checkbox', checked=wChecked, onchange='changeOutcome("/" + (this.checked ? "" : "un") + "wishOutcome/'+outcome.id+'")')
                         =outcome.name
+  .container
+    span.pull-right
+      a.btn.btn-large.btn-primary(href='/') See my recommendations
 
