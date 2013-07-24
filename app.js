@@ -77,7 +77,7 @@ app.use(function(req, res, next) {
     {title:'Home', link:'/'},
     {title:'Objectives', link:'/wishlist'}, 
     {title:'Courses', link:'/search'}, 
-    {title:'Source', link:'http://github.com/gootyfer/moocrank'}, 
+//    {title:'Source', link:'http://github.com/gootyfer/moocrank'}, 
     {title:'About', link:'/about'}
   ];
   res.locals.user = req.session.passport.user;
@@ -331,7 +331,7 @@ app.get('/unwishOutcome/:outcomeId', ensureLoggedIn('/login'), function(req, res
 app.get('/about', function(req, res){
   res.render('about', {
     title: 'About',
-    active: 4
+    active: 3
   });
 });
 
