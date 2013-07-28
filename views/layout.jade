@@ -26,10 +26,15 @@ html
                 ul.dropdown-menu
                   // li: a(href='/companies') Companies
                   li: a(href='/logout') Logout
+    .alert.alert-info
+      button.close(type='button', data-dismiss='alert') &times;
+      strong Hey there, user! 
+      | If you enjoyed using our service, please 
+      a(href='http://linkedup.ideascale.com/a/dtd/moocrank-recommendation-of-MOOCs-based-on-learning-outcomes/7201-24976', target='_blank') vote for moocrank in the LinkedUp competition
     block content
     block footer
       footer.footer
-        a(href='/about') About us
+        a(href='/about') About us 
         span.pull-right Contact at 
           a(href='mailto:info@moocrank.com') info@moocrank.com
   block script
