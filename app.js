@@ -112,7 +112,7 @@ app.get('/', function(req, res){
     res.redirect('/search');
   }else{
     res.render('index', {
-          title: 'moocrank',
+          title: 'moocrank - Personalized MOOC recommendations',
           active: 0
         });
   }
