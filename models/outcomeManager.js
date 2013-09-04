@@ -1,14 +1,20 @@
 var Db = require('mongodb').Db;
 var Server = require('mongodb').Server;
 
-OutcomeManager = function(host, port, dbName) {
+OutcomeManager = function(host, port, dbName, callback) {
 	//console.log(host+port+dbName);
   this.db= new Db(dbName, new Server(host, port), {auto_reconnect: true, safe: true});
   this.db.open(function(err, client){
   	if(err){
   		console.log("Error!:"+err);
+      if (callback) {
+        callback(error);
+      }
   	}else{
   		//console.log("open OK");
+      if (callback) {
+        callback(null, this);
+      }
   	}
   });
 };
@@ -81,6 +87,19 @@ OutcomeManager.prototype.save = function(outcomes, callback) {
           myCollection.insert(outcomes, function(err) {
           	if(err) console.log("ERROR:"+err);
           	callback(null, outcomes);
+        });
+      }
+    });
+};
+
+OutcomeManager.prototype.saveOne = function(id, outcome, callback) {
+    this.getCollection(function(error, myCollection) {
+      if( error ) callback(error);
+      else {
+        if( typeof(outcome.length)=="undefined")
+          myCollection.update({_id: id}, outcome, function(err) {
+          	if(err) console.log("ERROR:"+err);
+          	callback(null, outcome);
         });
       }
     });
