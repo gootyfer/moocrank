@@ -99,7 +99,7 @@ OutcomeManager.prototype.saveOne = function(id, outcome, callback) {
         if( typeof(outcome.length)=="undefined")
           myCollection.update({_id: id}, outcome, function(err) {
           	if(err) console.log("ERROR:"+err);
-          	callback(null, outcome);
+          	if (callback) callback(null, outcome);
         });
       }
     });

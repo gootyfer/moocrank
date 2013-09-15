@@ -1,6 +1,6 @@
 // Obtain keywords from outcome name and sub-category
-// Keywords are stored in 'keywords' array as objects:
-// {key, count}
+// Keywords are stored in 'keywords' objects with attributes:
+// key: count
 
 var config = require('../config.json'),
   natural = require('natural'),
@@ -11,12 +11,9 @@ var outcomeManager;
 function countElementsBuilder(increment) {
   return function(list, current) {
     if ( list[current] ) {
-      list[current].count += increment;
+      list[current] += increment;
     } else {
-      list[current] = {
-        key: current,
-        count: increment
-      };
+      list[current] = increment;
     }
     return list;
   };
@@ -31,13 +28,15 @@ function process(error, manager) {
       console.log(error);
       return;
     }
-    for (var i=0; i<outcomes.length; i++) {
+    for (var i = 0; i < outcomes.length; i++) {
       var outcome = outcomes[i];
       var nameStems = stemmer.tokenizeAndStem(outcome.name);
       var subcatStems = stemmer.tokenizeAndStem(outcome.subcatName);
 
       outcome.keywords = nameStems.reduce(countElementsBuilder(1), {});
       outcome.keywords = subcatStems.reduce(countElementsBuilder(2), outcome.keywords);
+
+      console.log(outcome);
 
       outcomeManager.saveOne(outcome._id, outcome);
     }
