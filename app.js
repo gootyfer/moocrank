@@ -278,7 +278,7 @@ app.post('/register', function(req, res) {
 app.get('/wishlist', ensureLoggedIn('/login'), function(req, res) {
    outcomeManager.findAll(function(error, outcomes) {
      var outcomesTree = treeStructure(outcomes);
-     User.findById(req.session.passport.user, function(err, user) {
+     util.isError(e);.findById(req.session.passport.user, function(err, user) {
        res.render('wishlist', {
          active: 1,
          title: 'Select outcomes',
