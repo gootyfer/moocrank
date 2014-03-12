@@ -17,3 +17,13 @@ Configure it!
 Run it!
 - node app.js
 - access the app in localhost:3000
+
+
+** Trobleshooting
+
+Commands to Install node 0.10 instead of 0.6:
+
+sudo apt-get install python-software-properties
+sudo add-apt-repository ppa:chris-lea/node.js
+sudo apt-get update
+sudo apt-get install nodejs
