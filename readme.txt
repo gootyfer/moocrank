@@ -21,9 +21,11 @@ Run it!
 
 ** Trobleshooting
 
-Commands to Install node 0.10 instead of 0.6:
+Ubuntu users. Commands to Install node 0.10 instead of 0.6:
 
 sudo apt-get install python-software-properties
 sudo add-apt-repository ppa:chris-lea/node.js
 sudo apt-get update
 sudo apt-get install nodejs
+
+Debian users. Install using backports: https://github.com/joyent/node/wiki/backports.debian.org
