@@ -28,4 +28,4 @@ sudo add-apt-repository ppa:chris-lea/node.js
 sudo apt-get update
 sudo apt-get install nodejs
 
-Debian users. Install using backports: https://github.com/joyent/node/wiki/backports.debian.org
+Debian users. Install using experimental: http://ypcs.fi/howto/2013/03/23/nodejs-debian/
